@@ -21,11 +21,11 @@ async function installAb() {
       `--tenant.url=http://localhost:${core.getInput("port") || 80}`,
    ];
 
-   core.startGroup("Initiliaze Docker Swarm");
+   core.startGroup("Initiliazing Docker Swarm");
    await exec.exec("docker swarm init");
    core.endGroup();
 
-   core.startGroup("Install AppBuilder");
+   core.startGroup("Installing AppBuilder");
    await exec.exec(`npx digi-serve/ab-cli install ${folder}`, installOpts);
    core.endGroup();
 
@@ -49,9 +49,8 @@ async function waitClosed(stack, attempt) {
          },
       };
 
-      core.info(`Check Network (${attempt})`);
+      core.info(`Checking the network (${attempt})`);
       exec.exec(`docker network ls`, [], options).then(() => {
-         core.info(`output: '${output}'`);
          if (output.includes(`${stack}_default`)) {
             // stack is found so:
             setTimeout(() => {
