@@ -1,13 +1,22 @@
-name: 'Wait'
-description: 'Wait a designated number of milliseconds'
+name: 'AppBuilder Install'
+description: 'Install Appbuilder for Tests'
 inputs:
-  milliseconds:  # id of input
-    description: 'number of milliseconds to wait'
-    required: true
-    default: '1000'
-outputs:
-  time: # output will be available to future steps
-    description: 'The current time after waiting'
+  stack:  # id of input
+    description: 'Docker stack reference'
+    required: false
+    default: 'ab'
+  folder:  # id of input
+    description: 'Folder to install in'
+    required: false
+    default: 'AppBuilder'
+  port:  # id of input
+    description: 'Port to use for the main stack'
+    required: false
+    default: '80'
+        
+# outputs:
+#   time: # output will be available to future steps
+#     description: 'The current time after waiting'
 runs:
   using: 'node16'
   main: 'dist/index.js'
