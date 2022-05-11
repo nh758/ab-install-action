@@ -5,19 +5,19 @@ async function installAb() {
    const folder = core.getInput("folder") || "AppBuilder";
    const stack = core.getInput("stack") || "ab";
    const installOpts = [
-      `stack=${stack}`,
-      `port=${core.getInput("port") || 80}`,
-      "db.expose=false",
-      "db.encryption=false",
-      "tag=develop",
-      "nginx.enable=true",
-      "ssl.none",
-      "bot.enable=false",
-      "smtp.enable=false",
-      "tenant.username=admin",
-      "tenant.password=admin",
-      "tenant.email=neo@thematrix.com",
-      `tenant.url=http://localhost:${core.getInput("port") || 80}`,
+      `--stack=${stack}`,
+      `--port=${core.getInput("port") || 80}`,
+      "--db.expose=false",
+      "--db.encryption=false",
+      "--tag=develop",
+      "--nginx.enable=true",
+      "--ssl.none",
+      "--bot.enable=false",
+      "--smtp.enable=false",
+      "--tenant.username=admin",
+      "--tenant.password=admin",
+      "--tenant.email=neo@thematrix.com",
+      `--tenant.url=http://localhost:${core.getInput("port") || 80}`,
    ];
 
    core.startGroup("Initiliaze Docker Swarm");
