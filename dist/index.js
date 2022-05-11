@@ -35,35 +35,40 @@ async function installAb() {
    await exec.exec(`npx digi-serve/ab-cli install ${folder}`, installOpts);
    core.endGroup();
 
-   core.info("Waiting for the Stack to come down");
-
-   await waitClosed();
+   core.startGroup("Waiting for the Stack to come down");
+   await waitClosed(stack, 1);
+   core.endGroup();
 
    core.info("Done");
 }
 
 module.exports = installAb;
 
-async function waitClosed(stack) {
-   let output = "";
+async function waitClosed(stack, attempt) {
+   return new Promise((resolve) => {
+      let output = "";
 
-   const options = {};
-   options.listeners = {
-      stdout: (data) => {
-         output += data.toString();
-      },
-   };
+      const options = { silent: true };
+      options.listeners = {
+         stdout: (data) => {
+            output += data.toString();
+         },
+      };
 
-   exec.exec(`docker network ls`, [], options);
-
-   if (output.includes(stack)) {
-      // stack is found so:
-      setTimeout(() => {
-         waitClosed(stack);
-      }, 1000);
-   } else {
-      return;
-   }
+      core.info(`Check Network (${attempt})`);
+      exec.exec(`docker network ls`, [], options).then(() => {
+         core.info(`output: '${output}'`);
+         if (output.includes(`${stack}_default`)) {
+            // stack is found so:
+            setTimeout(() => {
+               attempt++;
+               waitClosed(stack, attempt);
+            }, 1000);
+         } else {
+            return resolve();
+         }
+      });
+   });
 }
 
 
