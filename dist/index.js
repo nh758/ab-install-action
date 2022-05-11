@@ -15,6 +15,7 @@ async function installAb() {
       `--port=${core.getInput("port") || 80}`,
       "--db.expose=false",
       "--db.encryption=false",
+      "--db.password=root",
       "--tag=develop",
       "--nginx.enable=true",
       "--ssl.none",
