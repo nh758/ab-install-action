@@ -5,7 +5,7 @@ const proxyquire = require("proxyquire");
 const fakeExec = sinon.fake.resolves("");
 
 const installAb = proxyquire("./installAb", {
-   "@actions/exec": fakeExec,
+   "@actions/exec": { exec: fakeExec },
    // "@actions/core": { info: sinon.stub() },
 });
 

@@ -27,11 +27,11 @@ async function installAb() {
    ];
 
    core.startGroup("Initiliaze Docker Swarm");
-   await exec("docker swarm init");
+   await exec.exec("docker swarm init");
    core.endGroup();
 
    core.startGroup("Install AppBuilder");
-   await exec(`npx digi-serve/ab-cli install ${folder}`, installOpts);
+   await exec.exec(`npx digi-serve/ab-cli install ${folder}`, installOpts);
    core.endGroup();
 
    core.info("Waiting for the Stack to come down");
@@ -53,7 +53,7 @@ async function waitClosed(stack) {
       },
    };
 
-   exec(`docker network ls`, [], options);
+   exec.exec(`docker network ls`, [], options);
 
    if (output.includes(stack)) {
       // stack is found so:
