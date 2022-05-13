@@ -6,7 +6,7 @@
    "scripts": {
       "lint": "eslint .",
       "prepare": "ncc build index.js -o dist --source-map --license licenses.txt",
-      "test": "mocha --config test/.mocharc.js *.test.js",
+      "test": "mocha --config test/.mocharc.js test/*.test.js",
       "all": "npm run lint && npm run prepare && npm run test"
    },
    "repository": {

@@ -1,5 +1,5 @@
 const core = require("@actions/core");
-const installAb = require("./installAb");
+const installAb = require("./src/installAb");
 // const wait = require('./wait');
 
 // most @actions toolkit packages have async methods
