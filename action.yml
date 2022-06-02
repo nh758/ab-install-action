@@ -1,26 +1,31 @@
-name: 'AppBuilder Install'
-description: 'Install Appbuilder for Tests'
+name: "AppBuilder Install"
+description: "Install Appbuilder for Tests"
 inputs:
-  stack:  # id of input
-    description: 'Docker stack reference'
-    required: false
-    default: 'ab'
-  folder:  # id of input
-    description: 'Folder to install in'
-    required: false
-    default: 'AppBuilder'
-  port:  # id of input
-    description: 'Port to use for the main stack'
-    required: false
-    default: '80'
-  runtime:  # id of input
-    description: 'Runtime to use for ab_runtime test'
-    required: false
-    default: null
-        
+   stack: # id of input
+      description: "Docker stack reference"
+      required: false
+      default: "ab"
+   folder: # id of input
+      description: "Folder to install in"
+      required: false
+      default: "AppBuilder"
+   port: # id of input
+      description: "Port to use for the main stack"
+      required: false
+      default: "80"
+   runtime: # id of input
+      description: "Runtime to use for ab_runtime test"
+      required: false
+      default: null
+   repository:
+      description: "Repository name, ex digi-serve/repo"
+      default: ${{ github.repository }}
+   sha:
+      description: "Github sha - required for services"
+
 # outputs:
 #   time: # output will be available to future steps
 #     description: 'The current time after waiting'
 runs:
-  using: 'node16'
-  main: 'dist/index.js'
+   using: "node16"
+   main: "dist/index.js"
