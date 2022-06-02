@@ -32,11 +32,12 @@ async function installAb() {
    await exec.exec(`npx digi-serve/ab-cli install ${folder}`, installOpts);
    core.endGroup();
 
-   core.startGroup("Waiting for the Stack to come down");
-   await waitClosed(stack, 1);
-   core.endGroup();
+   // core.startGroup("Waiting for the Stack to come down");
+   // await waitClosed(stack, 1);
+   // core.endGroup();
 
-   core.info("Done");
+   core.info("Install Complete");
+   return;
 }
 
 module.exports = installAb;

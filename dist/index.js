@@ -6937,7 +6937,7 @@ const core = __nccwpck_require__(2186);
 
 function checkRepo() {
    const [org, repo] = core.getInput("repository").split("/");
-   console.log("input", core.getInput("repository"));
+   core.info("input", core.getInput("repository"));
    // console.log("repo", repo);
    if (org == "digi-serve") {
       if (repo.includes("ab_service_")) {
@@ -6988,11 +6988,12 @@ async function installAb() {
    await exec.exec(`npx digi-serve/ab-cli install ${folder}`, installOpts);
    core.endGroup();
 
-   core.startGroup("Waiting for the Stack to come down");
-   await waitClosed(stack, 1);
-   core.endGroup();
+   // core.startGroup("Waiting for the Stack to come down");
+   // await waitClosed(stack, 1);
+   // core.endGroup();
 
-   core.info("Done");
+   core.info("Install Complete");
+   return;
 }
 
 module.exports = installAb;
@@ -7038,7 +7039,7 @@ async function rebuildService(repo) {
    const folder = core.getInput("folder") || "AppBuilder";
    const sha = core.getInput("sha");
    if (sha == "undefined") return;
-
+   core.startGroup("Git Clone / Checkout");
    await exec.exec(
       `git clone --recursive https://github.com/digi-serve/${repo}.git`,
       [],
@@ -7058,7 +7059,9 @@ async function rebuildService(repo) {
    await exec.exec("git submodule update --recursive", [], {
       cwd: `./${folder}/${repo}`,
    });
+   core.endGroup();
 
+   core.startGroup(`Docker Build ${repo}:test`);
    await exec.exec(`docker build -t ${repo}:test .`, [], {
       cwd: `./${folder}/${repo}`,
    });
@@ -7073,12 +7076,16 @@ async function rebuildService(repo) {
       override.services[shortName] = {
          image: "${repo}:test",
       };
-      fs.writeFileSync("compose.override.yml", yaml.dump(override));
+      fs.writeFileSync(`./${folder}/compose.override.yml`, yaml.dump(override));
 
       core.startGroup("Check File Structure");
       await exec.exec(`ls`);
 
       await exec.exec(`ls`, [], {
+         cwd: `./${folder}`,
+      });
+
+      await exec.exec(`cat compose.override.yml`, [], {
          cwd: `./${folder}`,
       });
 
@@ -7248,11 +7255,15 @@ const rebuildService = __nccwpck_require__(1993);
 // most @actions toolkit packages have async methods
 async function run() {
    try {
+      core.info("Helllo!");
       await installAb();
+      core.startGroup("Service Build?");
       const repo = checkRepo();
+      core.info(repo);
       if (repo.type == "service") {
          rebuildService(repo.name);
       }
+      core.endGroup();
       // const ms = core.getInput('milliseconds');
       // core.info(`Waiting ${ms} milliseconds ...`);
       //

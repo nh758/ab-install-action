@@ -7,7 +7,7 @@ async function rebuildService(repo) {
    const folder = core.getInput("folder") || "AppBuilder";
    const sha = core.getInput("sha");
    if (sha == "undefined") return;
-
+   core.startGroup("Git Clone / Checkout");
    await exec.exec(
       `git clone --recursive https://github.com/digi-serve/${repo}.git`,
       [],
@@ -27,7 +27,9 @@ async function rebuildService(repo) {
    await exec.exec("git submodule update --recursive", [], {
       cwd: `./${folder}/${repo}`,
    });
+   core.endGroup();
 
+   core.startGroup(`Docker Build ${repo}:test`);
    await exec.exec(`docker build -t ${repo}:test .`, [], {
       cwd: `./${folder}/${repo}`,
    });
@@ -42,12 +44,16 @@ async function rebuildService(repo) {
       override.services[shortName] = {
          image: "${repo}:test",
       };
-      fs.writeFileSync("compose.override.yml", yaml.dump(override));
+      fs.writeFileSync(`./${folder}/compose.override.yml`, yaml.dump(override));
 
       core.startGroup("Check File Structure");
       await exec.exec(`ls`);
 
       await exec.exec(`ls`, [], {
+         cwd: `./${folder}`,
+      });
+
+      await exec.exec(`cat compose.override.yml`, [], {
          cwd: `./${folder}`,
       });
 
