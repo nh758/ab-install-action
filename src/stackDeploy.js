@@ -17,7 +17,7 @@ async function stackDeploy(folder, stack) {
    ];
    await exec.exec("docker stack deploy", opts, { cwd: `./${folder}` });
 
-   await exec.exec(" docker stack services", [stack]);
+   await exec.exec("docker stack services", [stack]);
    core.endGroup();
 }
 module.exports = stackDeploy;

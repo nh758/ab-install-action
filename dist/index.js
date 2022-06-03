@@ -7002,7 +7002,9 @@ function waitClosed(stack, attempt, pending = []) {
    return new Promise((resolve) => {
       let output = "";
 
-      const options = {};
+      const options = {
+         silent: true,
+      };
       options.listeners = {
          stdout: (data) => {
             output += data.toString();
@@ -7020,7 +7022,6 @@ function waitClosed(stack, attempt, pending = []) {
             }, 1000);
          } else {
             core.info("Stack is Down");
-
             pending.forEach((res) => {
                res();
             });
@@ -7092,7 +7093,7 @@ async function stackDeploy(folder, stack) {
    ];
    await exec.exec("docker stack deploy", opts, { cwd: `./${folder}` });
 
-   await exec.exec(" docker stack services", [stack]);
+   await exec.exec("docker stack services", [stack]);
    core.endGroup();
 }
 module.exports = stackDeploy;
@@ -7254,20 +7255,10 @@ const rebuildService = __nccwpck_require__(1993);
 async function run() {
    try {
       await installAb();
-      core.info("repo.name");
       const repo = checkRepo();
-      core.info(repo.name);
       if (repo.type == "service") {
          rebuildService(repo.name);
       }
-      // const ms = core.getInput('milliseconds');
-      // core.info(`Waiting ${ms} milliseconds ...`);
-      //
-      // core.debug((new Date()).toTimeString()); // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
-      // await wait(parseInt(ms));
-      // core.info((new Date()).toTimeString());
-      //
-      // core.setOutput('time', new Date().toTimeString());
    } catch (error) {
       core.setFailed(error.message);
    }

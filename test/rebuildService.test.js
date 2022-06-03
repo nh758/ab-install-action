@@ -3,47 +3,51 @@ const sinon = require("sinon");
 const proxyquire = require("proxyquire");
 
 const fakeExec = sinon.fake.resolves("");
-
+const fakeFs = sinon.fake();
+const fakeStackDeploy = sinon.fake();
+const fakeYaml = sinon.fake();
 const rebuildService = proxyquire("../src/rebuildService", {
    "@actions/exec": { exec: fakeExec },
-   // "@actions/core": { info: sinon.stub() },
+   fs: { writeFileSync: fakeFs },
+   "./stackDeploy.js": fakeStackDeploy,
+   "js-yaml": { dump: fakeYaml },
 });
 
 beforeEach(() => {
-   delete process.env["INPUT_SHA"];
-   // delete process.env["INPUT_FOLDER"];
-   // delete process.env["INPUT_PORT"];
-   // delete process.env["INPUT_RUNTIME"];
    fakeExec.resetHistory();
+   fakeFs.resetHistory();
+   fakeStackDeploy.resetHistory();
+   fakeYaml.resetHistory();
 });
 
-describe("rebuild calls exec", () => {
-   it("passes the correct args", async () => {
+describe("rebuild services", () => {
+   it("calls exec", async () => {
       await rebuildService("ab_service_user_manager");
-      assert.equal(fakeExec.callCount, 3);
-      const [firstCall, secondCall, thirdCall] = fakeExec.args;
-      assert.equal(
-         firstCall[0],
-         "git clone https://github.com/digi-serve/ab_service_user_manager.git"
-      );
-      assert.equal(firstCall[2].cwd, "./AppBuilder");
-      assert.equal(secondCall[2].cwd, "./AppBuilder/ab_service_user_manager");
-      assert.equal(thirdCall[0], "git checkout ");
-      assert.equal(thirdCall[2].cwd, "./AppBuilder/ab_service_user_manager");
+      assert.equal(fakeExec.callCount, 1);
+      const [[command, , options]] = fakeExec.args;
+      assert.equal(command, "docker build -t ab_service_user_manager:test .");
+      assert.equal(options.cwd, "./ab_service_user_manager");
    });
-   it("reads sha", async () => {
-      process.env["INPUT_SHA"] = "1234567890";
+   it("creates override", async () => {
       await rebuildService("ab_service_user_manager");
-      assert.equal(fakeExec.callCount, 3);
-      const [, , thirdCall] = fakeExec.args;
-      assert.equal(thirdCall[0], "git checkout 1234567890");
+      assert.equal(fakeYaml.callCount, 1);
+      assert.equal(fakeFs.callCount, 1);
+      const [[path]] = fakeFs.args;
+      assert.equal(path, "./AppBuilder/compose.override.yml");
+      assert.deepEqual(fakeYaml.args[0][0], {
+         version: "3.2",
+         services: {
+            user_manager: {
+               image: "ab_service_user_manager:test",
+            },
+         },
+      });
    });
-   // assert.equal(fakeExec.callCount, 3);
-   // assert.equal(fakeExec.args[0], [
-   //    `git clone https://github.com/digi-serve/ab_service_user_manager.git`,
-   //    [],
-   //    {
-   //       cwd: ".ab",
-   //    },
-   // ]);
+   it("calls stackDeploy", async () => {
+      await rebuildService("ab_service_user_manager");
+      assert.equal(fakeStackDeploy.callCount, 1);
+      const [[folder, stack]] = fakeStackDeploy.args;
+      assert.equal(folder, "AppBuilder");
+      assert.equal(stack, "ab");
+   });
 });

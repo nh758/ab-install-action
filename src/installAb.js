@@ -46,7 +46,9 @@ function waitClosed(stack, attempt, pending = []) {
    return new Promise((resolve) => {
       let output = "";
 
-      const options = {};
+      const options = {
+         silent: true,
+      };
       options.listeners = {
          stdout: (data) => {
             output += data.toString();
@@ -64,7 +66,6 @@ function waitClosed(stack, attempt, pending = []) {
             }, 1000);
          } else {
             core.info("Stack is Down");
-
             pending.forEach((res) => {
                res();
             });
