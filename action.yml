@@ -20,8 +20,6 @@ inputs:
    repository:
       description: "Repository name, ex digi-serve/repo"
       default: ${{ github.repository }}
-   sha:
-      description: "Github sha - required for services"
 
 # outputs:
 #   time: # output will be available to future steps
