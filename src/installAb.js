@@ -29,27 +29,24 @@ async function installAb() {
    core.endGroup();
 
    core.startGroup("Installing AppBuilder");
-   await exec.exec("pwd");
-   await exec.exec("ls");
 
    await exec.exec(`npx digi-serve/ab-cli install ${folder}`, installOpts);
    core.endGroup();
 
-   // core.startGroup("Waiting for the Stack to come down");
-   // await waitClosed(stack, 1);
-   // core.endGroup();
+   core.startGroup("Waiting for the Stack to come down");
+   await waitClosed(stack, 1);
+   core.endGroup();
 
-   core.info("Install Complete");
    return;
 }
 
 module.exports = installAb;
 
-async function waitClosed(stack, attempt) {
+function waitClosed(stack, attempt, pending = []) {
    return new Promise((resolve) => {
       let output = "";
 
-      const options = { silent: true };
+      const options = {};
       options.listeners = {
          stdout: (data) => {
             output += data.toString();
@@ -60,12 +57,18 @@ async function waitClosed(stack, attempt) {
       exec.exec(`docker network ls`, [], options).then(() => {
          if (output.includes(`${stack}_default`)) {
             // stack is found so:
-            setTimeout(() => {
+            setTimeout(async () => {
                attempt++;
-               waitClosed(stack, attempt);
+               waitClosed(stack, attempt, pending);
+               pending.push(resolve);
             }, 1000);
          } else {
-            return resolve();
+            core.info("Stack is Down");
+
+            pending.forEach((res) => {
+               res();
+            });
+            resolve();
          }
       });
    });

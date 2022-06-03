@@ -6985,27 +6985,24 @@ async function installAb() {
    core.endGroup();
 
    core.startGroup("Installing AppBuilder");
-   await exec.exec("pwd");
-   await exec.exec("ls");
 
    await exec.exec(`npx digi-serve/ab-cli install ${folder}`, installOpts);
    core.endGroup();
 
-   // core.startGroup("Waiting for the Stack to come down");
-   // await waitClosed(stack, 1);
-   // core.endGroup();
+   core.startGroup("Waiting for the Stack to come down");
+   await waitClosed(stack, 1);
+   core.endGroup();
 
-   core.info("Install Complete");
    return;
 }
 
 module.exports = installAb;
 
-async function waitClosed(stack, attempt) {
+function waitClosed(stack, attempt, pending = []) {
    return new Promise((resolve) => {
       let output = "";
 
-      const options = { silent: true };
+      const options = {};
       options.listeners = {
          stdout: (data) => {
             output += data.toString();
@@ -7016,12 +7013,18 @@ async function waitClosed(stack, attempt) {
       exec.exec(`docker network ls`, [], options).then(() => {
          if (output.includes(`${stack}_default`)) {
             // stack is found so:
-            setTimeout(() => {
+            setTimeout(async () => {
                attempt++;
-               waitClosed(stack, attempt);
+               waitClosed(stack, attempt, pending);
+               pending.push(resolve);
             }, 1000);
          } else {
-            return resolve();
+            core.info("Stack is Down");
+
+            pending.forEach((res) => {
+               res();
+            });
+            resolve();
          }
       });
    });
@@ -7051,32 +7054,16 @@ async function rebuildService(repo) {
    const shortName = repo.replace("ab_service_", "");
 
    // build the overrideFile
-   try {
-      const override = {
-         version: "3.2",
-         services: {},
-      };
-      override.services[shortName] = {
-         image: `${repo}:test`,
-      };
-      fs.writeFileSync(`./${folder}/compose.override.yml`, yaml.dump(override));
+   const override = {
+      version: "3.2",
+      services: {},
+   };
+   override.services[shortName] = {
+      image: `${repo}:test`,
+   };
+   fs.writeFileSync(`./${folder}/compose.override.yml`, yaml.dump(override));
 
-      core.startGroup("Check File Structure");
-      await exec.exec(`ls`);
-
-      await exec.exec(`ls`, [], {
-         cwd: `./${folder}`,
-      });
-
-      await exec.exec(`ls`, [], {
-         cwd: `./${repo}`,
-      });
-      core.endGroup();
-
-      await stackDeploy(folder, stack);
-   } catch (e) {
-      core.info(e);
-   }
+   await stackDeploy(folder, stack);
 }
 module.exports = rebuildService;
 
@@ -7267,7 +7254,9 @@ const rebuildService = __nccwpck_require__(1993);
 async function run() {
    try {
       await installAb();
+      core.info("repo.name");
       const repo = checkRepo();
+      core.info(repo.name);
       if (repo.type == "service") {
          rebuildService(repo.name);
       }

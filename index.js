@@ -7,7 +7,9 @@ const rebuildService = require("./src/rebuildService");
 async function run() {
    try {
       await installAb();
+      core.info("repo.name");
       const repo = checkRepo();
+      core.info(repo.name);
       if (repo.type == "service") {
          rebuildService(repo.name);
       }

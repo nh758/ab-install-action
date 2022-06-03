@@ -16,31 +16,15 @@ async function rebuildService(repo) {
    const shortName = repo.replace("ab_service_", "");
 
    // build the overrideFile
-   try {
-      const override = {
-         version: "3.2",
-         services: {},
-      };
-      override.services[shortName] = {
-         image: `${repo}:test`,
-      };
-      fs.writeFileSync(`./${folder}/compose.override.yml`, yaml.dump(override));
+   const override = {
+      version: "3.2",
+      services: {},
+   };
+   override.services[shortName] = {
+      image: `${repo}:test`,
+   };
+   fs.writeFileSync(`./${folder}/compose.override.yml`, yaml.dump(override));
 
-      core.startGroup("Check File Structure");
-      await exec.exec(`ls`);
-
-      await exec.exec(`ls`, [], {
-         cwd: `./${folder}`,
-      });
-
-      await exec.exec(`ls`, [], {
-         cwd: `./${repo}`,
-      });
-      core.endGroup();
-
-      await stackDeploy(folder, stack);
-   } catch (e) {
-      core.info(e);
-   }
+   await stackDeploy(folder, stack);
 }
 module.exports = rebuildService;
