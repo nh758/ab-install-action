@@ -6985,6 +6985,9 @@ async function installAb() {
    core.endGroup();
 
    core.startGroup("Installing AppBuilder");
+   await exec.exec("pwd");
+   await exec.exec("ls");
+
    await exec.exec(`npx digi-serve/ab-cli install ${folder}`, installOpts);
    core.endGroup();
 
@@ -7034,36 +7037,15 @@ const core = __nccwpck_require__(2186);
 const exec = __nccwpck_require__(1514);
 const yaml = __nccwpck_require__(1917);
 const fs = __nccwpck_require__(5747);
+const stackDeploy = __nccwpck_require__(5191);
 
 async function rebuildService(repo) {
    const folder = core.getInput("folder") || "AppBuilder";
-   const sha = core.getInput("sha");
-   if (sha == "undefined") return;
-   core.startGroup("Git Clone / Checkout");
-   await exec.exec(
-      `git clone --recursive https://github.com/digi-serve/${repo}.git`,
-      [],
-      {
-         cwd: `./${folder}`,
-      }
-   );
-   // Fetch pr branches
-   await exec.exec("git fetch origin '+refs/pull/*:refs/remotes/pr/*'", [], {
-      cwd: `./${folder}/${repo}`,
-   });
-
-   await exec.exec(`git checkout ${sha}`, [], {
-      cwd: `./${folder}/${repo}`,
-   });
-
-   await exec.exec("git submodule update --recursive", [], {
-      cwd: `./${folder}/${repo}`,
-   });
-   core.endGroup();
+   const stack = core.getInput("stack") || "ab";
 
    core.startGroup(`Docker Build ${repo}:test`);
    await exec.exec(`docker build -t ${repo}:test .`, [], {
-      cwd: `./${folder}/${repo}`,
+      cwd: `./${repo}`,
    });
 
    const shortName = repo.replace("ab_service_", "");
@@ -7071,10 +7053,11 @@ async function rebuildService(repo) {
    // build the overrideFile
    try {
       const override = {
+         version: "3.2",
          services: {},
       };
       override.services[shortName] = {
-         image: "${repo}:test",
+         image: `${repo}:test`,
       };
       fs.writeFileSync(`./${folder}/compose.override.yml`, yaml.dump(override));
 
@@ -7085,19 +7068,47 @@ async function rebuildService(repo) {
          cwd: `./${folder}`,
       });
 
-      await exec.exec(`cat compose.override.yml`, [], {
-         cwd: `./${folder}`,
-      });
-
       await exec.exec(`ls`, [], {
-         cwd: `./${folder}/${repo}`,
+         cwd: `./${repo}`,
       });
       core.endGroup();
+
+      await stackDeploy(folder, stack);
    } catch (e) {
       core.info(e);
    }
 }
 module.exports = rebuildService;
+
+
+/***/ }),
+
+/***/ 5191:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+// docker stack deploy -c $File -c docker-compose.override.yml $TestOveride ab
+const core = __nccwpck_require__(2186);
+const exec = __nccwpck_require__(1514);
+
+async function stackDeploy(folder, stack) {
+   core.startGroup("Deploy the Stack");
+   const opts = [
+      "-c",
+      "docker-compose.yml",
+      "-c",
+      "docker-compose.override.yml",
+      "-c",
+      "compose.override.yml",
+      "-c",
+      "./test/setup/ci-test.overide.yml",
+      stack,
+   ];
+   await exec.exec("docker stack deploy", opts, { cwd: `./${folder}` });
+
+   await exec.exec(" docker stack services", [stack]);
+   core.endGroup();
+}
+module.exports = stackDeploy;
 
 
 /***/ }),
@@ -7255,15 +7266,11 @@ const rebuildService = __nccwpck_require__(1993);
 // most @actions toolkit packages have async methods
 async function run() {
    try {
-      core.info("Helllo!");
       await installAb();
-      core.startGroup("Service Build?");
       const repo = checkRepo();
-      core.info(repo);
       if (repo.type == "service") {
          rebuildService(repo.name);
       }
-      core.endGroup();
       // const ms = core.getInput('milliseconds');
       // core.info(`Waiting ${ms} milliseconds ...`);
       //

@@ -6,15 +6,11 @@ const rebuildService = require("./src/rebuildService");
 // most @actions toolkit packages have async methods
 async function run() {
    try {
-      core.info("Helllo!");
       await installAb();
-      core.startGroup("Service Build?");
       const repo = checkRepo();
-      core.info(repo);
       if (repo.type == "service") {
          rebuildService(repo.name);
       }
-      core.endGroup();
       // const ms = core.getInput('milliseconds');
       // core.info(`Waiting ${ms} milliseconds ...`);
       //

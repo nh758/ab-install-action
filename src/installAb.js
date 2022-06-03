@@ -29,6 +29,9 @@ async function installAb() {
    core.endGroup();
 
    core.startGroup("Installing AppBuilder");
+   await exec.exec("pwd");
+   await exec.exec("ls");
+
    await exec.exec(`npx digi-serve/ab-cli install ${folder}`, installOpts);
    core.endGroup();
 
