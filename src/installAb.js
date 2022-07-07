@@ -59,7 +59,7 @@ function waitClosed(stack, attempt, pending = []) {
       exec.exec(`docker network ls`, [], options).then(() => {
          if (output.includes(`${stack}_default`)) {
             // stack is found so:
-            setTimeout(async () => {
+            setTimeout(() => {
                attempt++;
                waitClosed(stack, attempt, pending);
                pending.push(resolve);
