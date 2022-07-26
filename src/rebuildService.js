@@ -10,8 +10,8 @@ async function rebuildService(repos) {
       version: "3.2",
       services: {},
    };
-   core.startGroup(`Rebuilding Docker Images (repo:test)`);
-   core.info(repos);
+   core.startGroup(`Rebuilding Docker Images`);
+   core.info(`\u001b[35m  ${repos.join(":test\n  ")}:test`);
    const folder = core.getInput("folder") || "AppBuilder";
    const stack = core.getInput("stack") || "ab";
    const builds = [];
