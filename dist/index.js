@@ -7519,23 +7519,24 @@ async function rebuildService(repos) {
       version: "3.2",
       services: {},
    };
-
+   core.startGroup(`Rebuilding Docker Images (repo:test)`);
+   core.info(repos);
    const folder = core.getInput("folder") || "AppBuilder";
    const stack = core.getInput("stack") || "ab";
-   await repos.forEach(async (repo) => {
-      core.startGroup(`Docker Build ${repo}:test`);
-      await exec.exec(`docker build -t ${repo}:test .`, [], {
+   const builds = [];
+   repos.forEach(async (repo) => {
+      const build = exec.exec(`docker build -t ${repo}:test .`, [], {
          cwd: `./${repo}`,
       });
-
+      builds.push(build);
       const shortName = repo.replace("ab_service_", "");
 
       override.services[shortName] = {
          image: `${repo}:test`,
       };
-
-      core.endGroup();
    });
+   await Promise.all(builds);
+
    fs.writeFileSync(`./${folder}/compose.override.yml`, yaml.dump(override));
 
    await stackDeploy(folder, stack);
