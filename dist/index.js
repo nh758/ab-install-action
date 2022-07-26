@@ -6943,6 +6943,12 @@ function checkRepo() {
       if (repo.includes("ab_service_")) {
          return { type: "service", name: repo };
       }
+      if (repo == "appbuilder_platform_service") {
+         return { type: "appbuilder", name: repo };
+      }
+      if (repo == "appbuilder_class_core") {
+         return { type: "core", name: repo };
+      }
    }
    return { type: "n/a" };
 }
@@ -7043,25 +7049,29 @@ const yaml = __nccwpck_require__(1917);
 const fs = __nccwpck_require__(5747);
 const stackDeploy = __nccwpck_require__(5191);
 
-async function rebuildService(repo) {
-   const folder = core.getInput("folder") || "AppBuilder";
-   const stack = core.getInput("stack") || "ab";
-
-   core.startGroup(`Docker Build ${repo}:test`);
-   await exec.exec(`docker build -t ${repo}:test .`, [], {
-      cwd: `./${repo}`,
-   });
-
-   const shortName = repo.replace("ab_service_", "");
-
+async function rebuildService(repos) {
    // build the overrideFile
    const override = {
       version: "3.2",
       services: {},
    };
-   override.services[shortName] = {
-      image: `${repo}:test`,
-   };
+
+   const folder = core.getInput("folder") || "AppBuilder";
+   const stack = core.getInput("stack") || "ab";
+   await repos.forEach(async (repo) => {
+      core.startGroup(`Docker Build ${repo}:test`);
+      await exec.exec(`docker build -t ${repo}:test .`, [], {
+         cwd: `./${repo}`,
+      });
+
+      const shortName = repo.replace("ab_service_", "");
+
+      override.services[shortName] = {
+         image: `${repo}:test`,
+      };
+
+      core.endGroup();
+   });
    fs.writeFileSync(`./${folder}/compose.override.yml`, yaml.dump(override));
 
    await stackDeploy(folder, stack);
@@ -7250,14 +7260,32 @@ const core = __nccwpck_require__(2186);
 const installAb = __nccwpck_require__(1613);
 const checkRepo = __nccwpck_require__(4603);
 const rebuildService = __nccwpck_require__(1993);
+const abServices = [
+   // {const} services that include AppBuider Platform Service Repo
+   "ab_service_appbuilder",
+   "ab_service_custom_reports",
+   "ab_service_definition_manager",
+   "ab_service_file_processor",
+   "ab_service_process_manager",
+   "ab_service_user_manager",
+];
 
 // most @actions toolkit packages have async methods
 async function run() {
    try {
       await installAb();
       const repo = checkRepo();
-      if (repo.type == "service") {
-         rebuildService(repo.name);
+      switch (repo.type) {
+         case "service":
+            await rebuildService([repo.name]);
+            break;
+         case "appbuilder":
+            await rebuildService(abServices);
+            break;
+         case "core":
+            await rebuildService(["ab_service_web", ...abServices]);
+            break;
+         default:
       }
    } catch (error) {
       core.setFailed(error.message);
