@@ -22,14 +22,14 @@ beforeEach(() => {
 
 describe("rebuild services", () => {
    it("calls exec", async () => {
-      await rebuildService("ab_service_user_manager");
+      await rebuildService(["ab_service_user_manager"]);
       assert.equal(fakeExec.callCount, 1);
       const [[command, , options]] = fakeExec.args;
       assert.equal(command, "docker build -t ab_service_user_manager:test .");
       assert.equal(options.cwd, "./ab_service_user_manager");
    });
    it("creates override", async () => {
-      await rebuildService("ab_service_user_manager");
+      await rebuildService(["ab_service_user_manager"]);
       assert.equal(fakeYaml.callCount, 1);
       assert.equal(fakeFs.callCount, 1);
       const [[path]] = fakeFs.args;
@@ -44,7 +44,7 @@ describe("rebuild services", () => {
       });
    });
    it("calls stackDeploy", async () => {
-      await rebuildService("ab_service_user_manager");
+      await rebuildService(["ab_service_user_manager"]);
       assert.equal(fakeStackDeploy.callCount, 1);
       const [[folder, stack]] = fakeStackDeploy.args;
       assert.equal(folder, "AppBuilder");
