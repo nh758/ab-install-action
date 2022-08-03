@@ -14,6 +14,9 @@ function checkRepo() {
       if (repo == "appbuilder_class_core") {
          return { type: "core", name: repo };
       }
+      if (repo == "ab_platform_web") {
+         return { type: "platorm_web", name: repo };
+      }
    }
    return { type: "n/a" };
 }

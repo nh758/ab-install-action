@@ -27,6 +27,9 @@ async function run() {
          case "core":
             await rebuildService(["ab_service_web", ...abServices]);
             break;
+         case "platorm_web":
+            await rebuildService(["ab_service_web", "ab_service_api_sails"]);
+            break;
          default:
       }
    } catch (error) {

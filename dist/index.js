@@ -7413,6 +7413,9 @@ function checkRepo() {
       if (repo == "appbuilder_class_core") {
          return { type: "core", name: repo };
       }
+      if (repo == "ab_platform_web") {
+         return { type: "platorm_web", name: repo };
+      }
    }
    return { type: "n/a" };
 }
@@ -7520,7 +7523,7 @@ async function rebuildService(repos) {
       services: {},
    };
    core.startGroup(`Rebuilding Docker Images`);
-   core.info(`\u001b[35m - ${repos.join(":test\n  ")}:test`);
+   core.info(`\u001b[35m  ${repos.join(":test\n  ")}:test`);
    const folder = core.getInput("folder") || "AppBuilder";
    const stack = core.getInput("stack") || "ab";
    const builds = [];
@@ -7749,6 +7752,9 @@ async function run() {
             break;
          case "core":
             await rebuildService(["ab_service_web", ...abServices]);
+            break;
+         case "platorm_web":
+            await rebuildService(["ab_service_web", "ab_service_api_sails"]);
             break;
          default:
       }
