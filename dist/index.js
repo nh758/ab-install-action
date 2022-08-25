@@ -7457,7 +7457,7 @@ async function installAb() {
    core.startGroup("Installing AppBuilder");
 
    await exec.exec(
-      `npx https://github.com/digi-serve/ab-cli install ${folder}`,
+      `npm exec -- https://github.com/digi-serve/ab-cli install ${folder}`,
       installOpts
    );
    core.endGroup();

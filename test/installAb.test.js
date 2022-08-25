@@ -20,7 +20,7 @@ beforeEach(() => {
 describe("installer calls exec", () => {
    it("with default opts", async () => {
       const expected = [
-         "npx https://github.com/digi-serve/ab-cli install AppBuilder",
+         "npm exec -- https://github.com/digi-serve/ab-cli install AppBuilder",
          [
             `--stack=ab`,
             `--port=80`,
@@ -50,7 +50,7 @@ describe("installer calls exec", () => {
       process.env["INPUT_FOLDER"] = "my_folder";
       process.env["INPUT_PORT"] = "8080";
       const expected = [
-         "npx https://github.com/digi-serve/ab-cli install my_folder",
+         "npm exec -- https://github.com/digi-serve/ab-cli install my_folder",
          [
             `--stack=my_ab`,
             `--port=8080`,
@@ -78,7 +78,7 @@ describe("installer calls exec", () => {
    it("with the input runtime", async () => {
       process.env["INPUT_RUNTIME"] = "c3499c2729730a7f807efb8676a92dcb6f8a3f8f";
       const expected = [
-         "npx https://github.com/digi-serve/ab-cli install AppBuilder",
+         "npm exec -- https://github.com/digi-serve/ab-cli install AppBuilder",
          [
             "--stack=ab",
             "--port=80",
