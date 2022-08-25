@@ -20,7 +20,7 @@ beforeEach(() => {
 describe("installer calls exec", () => {
    it("with default opts", async () => {
       const expected = [
-         "npm exec -- https://github.com/digi-serve/ab-cli install AppBuilder",
+         "appbuilder install AppBuilder",
          [
             `--stack=ab`,
             `--port=80`,
@@ -40,9 +40,9 @@ describe("installer calls exec", () => {
       ];
       await installAb();
 
-      assert.equal(fakeExec.callCount, 3);
+      assert.equal(fakeExec.callCount, 4);
       assert.equal(fakeExec.args[0], "docker swarm init");
-      assert.deepEqual(fakeExec.args[1], expected);
+      assert.deepEqual(fakeExec.args[2], expected);
    });
 
    it("with inputs", async () => {
@@ -50,7 +50,7 @@ describe("installer calls exec", () => {
       process.env["INPUT_FOLDER"] = "my_folder";
       process.env["INPUT_PORT"] = "8080";
       const expected = [
-         "npm exec -- https://github.com/digi-serve/ab-cli install my_folder",
+         "appbuilder install my_folder",
          [
             `--stack=my_ab`,
             `--port=8080`,
@@ -70,15 +70,15 @@ describe("installer calls exec", () => {
       ];
       await installAb();
 
-      assert.equal(fakeExec.callCount, 3);
+      assert.equal(fakeExec.callCount, 4);
       assert.equal(fakeExec.args[0], "docker swarm init");
-      assert.deepEqual(fakeExec.args[1], expected);
+      assert.deepEqual(fakeExec.args[2], expected);
    });
 
    it("with the input runtime", async () => {
       process.env["INPUT_RUNTIME"] = "c3499c2729730a7f807efb8676a92dcb6f8a3f8f";
       const expected = [
-         "npm exec -- https://github.com/digi-serve/ab-cli install AppBuilder",
+         "appbuilder install AppBuilder",
          [
             "--stack=ab",
             "--port=80",
@@ -99,8 +99,8 @@ describe("installer calls exec", () => {
       ];
       await installAb();
 
-      assert.equal(fakeExec.callCount, 3);
+      assert.equal(fakeExec.callCount, 4);
       assert.equal(fakeExec.args[0], "docker swarm init");
-      assert.deepEqual(fakeExec.args[1], expected);
+      assert.deepEqual(fakeExec.args[2], expected);
    });
 });
