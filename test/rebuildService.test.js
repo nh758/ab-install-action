@@ -35,7 +35,7 @@ describe("rebuild services", () => {
       const [[path]] = fakeFs.args;
       assert.equal(path, "./AppBuilder/compose.override.yml");
       assert.deepEqual(fakeYaml.args[0][0], {
-         version: "3.2",
+         version: "3.9",
          services: {
             user_manager: {
                image: "ab_service_user_manager:test",

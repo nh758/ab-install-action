@@ -7,7 +7,7 @@ const stackDeploy = require("./stackDeploy.js");
 async function rebuildService(repos) {
    // build the overrideFile
    const override = {
-      version: "3.2",
+      version: "3.9",
       services: {},
    };
    core.startGroup(`Rebuilding Docker Images`);
