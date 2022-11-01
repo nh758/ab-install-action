@@ -1,7 +1,5 @@
 const core = require("@actions/core");
 const exec = require("@actions/exec");
-const yaml = require("js-yaml");
-const fs = require("fs");
 const stackDeploy = require("./stackDeploy.js");
 
 async function rebuildService(repos) {

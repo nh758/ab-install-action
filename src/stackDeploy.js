@@ -28,14 +28,10 @@ async function isServiceUp(keywordService) {
    return output.includes("1/1");
 }
 
-function waitServiceUp(keywordService) {
-   return new Promise(async (resolve) => {
-      while (!(await isServiceUp(keywordService))) await waitmS(1000);
+async function waitServiceUp(keywordService) {
+   while (!(await isServiceUp(keywordService))) await waitmS(1000);
 
-      await waitmS(5000);
-
-      resolve();
-   });
+   await waitmS(5000);
 }
 
 async function stackDeploy(folder, stack, images = []) {
