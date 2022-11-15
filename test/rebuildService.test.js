@@ -28,21 +28,6 @@ describe("rebuild services", () => {
       assert.equal(command, "docker build -t ab_service_user_manager:test .");
       assert.equal(options.cwd, "./ab_service_user_manager");
    });
-   it("creates override", async () => {
-      await rebuildService(["ab_service_user_manager"]);
-      assert.equal(fakeYaml.callCount, 1);
-      assert.equal(fakeFs.callCount, 1);
-      const [[path]] = fakeFs.args;
-      assert.equal(path, "./AppBuilder/compose.override.yml");
-      assert.deepEqual(fakeYaml.args[0][0], {
-         version: "3.9",
-         services: {
-            user_manager: {
-               image: "ab_service_user_manager:test",
-            },
-         },
-      });
-   });
    it("calls stackDeploy", async () => {
       await rebuildService(["ab_service_user_manager"]);
       assert.equal(fakeStackDeploy.callCount, 1);

@@ -3,9 +3,11 @@ const sinon = require("sinon");
 const proxyquire = require("proxyquire");
 
 const fakeExec = sinon.fake.resolves("");
+const fakeWait = sinon.fake.resolves("");
 
 const stackDeploy = proxyquire("../src/stackDeploy", {
    "@actions/exec": { exec: fakeExec },
+   "./util/waitService.js": { waitServiceUp: fakeWait },
 });
 
 beforeEach(() => {
@@ -23,8 +25,6 @@ describe("rebuild services", () => {
          "docker-compose.yml",
          "-c",
          "docker-compose.override.yml",
-         "-c",
-         "compose.override.yml",
          "-c",
          "./test/setup/ci-test.overide.yml",
          "ab",
