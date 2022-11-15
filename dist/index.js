@@ -3432,6 +3432,44 @@ module.exports = rebuildService;
 // docker stack deploy -c $File -c docker-compose.override.yml $TestOveride ab
 const core = __nccwpck_require__(186);
 const exec = __nccwpck_require__(514);
+const { waitServiceUp } = __nccwpck_require__(628);
+
+async function stackDeploy(folder, stack, images = []) {
+   core.startGroup("Deploy the Stack");
+   const opts = [
+      "-c",
+      "docker-compose.yml",
+      "-c",
+      "docker-compose.override.yml",
+      "-c",
+      "./test/setup/ci-test.overide.yml",
+      stack,
+   ];
+   await exec.exec("docker stack deploy", opts, { cwd: `./${folder}` });
+
+   await waitServiceUp("sails");
+
+   for (let i = 0; i < images.length; i++) {
+      const shortName = images[i].replace("ab_service_", "");
+
+      await exec.exec(
+         `docker service update --image ${images[i]}:test ${stack}_${shortName}`
+      );
+   }
+
+   await exec.exec("docker stack services", [stack]);
+
+   core.endGroup();
+}
+module.exports = stackDeploy;
+
+
+/***/ }),
+
+/***/ 628:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const exec = __nccwpck_require__(514);
 
 function waitmS(mS) {
    return new Promise((resolve) => {
@@ -3465,34 +3503,7 @@ async function waitServiceUp(keywordService) {
    await waitmS(5000);
 }
 
-async function stackDeploy(folder, stack, images = []) {
-   core.startGroup("Deploy the Stack");
-   const opts = [
-      "-c",
-      "docker-compose.yml",
-      "-c",
-      "docker-compose.override.yml",
-      "-c",
-      "./test/setup/ci-test.overide.yml",
-      stack,
-   ];
-   await exec.exec("docker stack deploy", opts, { cwd: `./${folder}` });
-
-   await waitServiceUp("sails");
-
-   for (let i = 0; i < images.length; i++) {
-      const shortName = images[i].replace("ab_service_", "");
-
-      await exec.exec(
-         `docker service update --image ${images[i]}:test ${stack}_${shortName}`
-      );
-   }
-
-   await exec.exec("docker stack services", [stack]);
-
-   core.endGroup();
-}
-module.exports = stackDeploy;
+module.exports = { waitServiceUp, isServiceUp, waitmS };
 
 
 /***/ }),
