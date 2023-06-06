@@ -3322,7 +3322,7 @@ const exec = __nccwpck_require__(514);
 async function installAb() {
    const folder = core.getInput("folder") || "AppBuilder";
    const stack = core.getInput("stack") || "ab";
-   const runtime = core.getInput("runtime") || null;
+   // const runtime = core.getInput("runtime") || null;
    const installOpts = [
       `--stack=${stack}`,
       `--port=${core.getInput("port") || 80}`,
@@ -3340,7 +3340,9 @@ async function installAb() {
       `--tenant.url=http://localhost:${core.getInput("port") || 80}`,
    ];
 
-   if (runtime) installOpts.push(`--runtime=${runtime}`);
+   // if (runtime) installOpts.push(`--runtime=${runtime}`);
+
+   installOpts.push(`--runtime=guy/Reverse`);
 
    core.startGroup("Initiliazing Docker Swarm");
    await exec.exec("docker swarm init");
@@ -3348,7 +3350,7 @@ async function installAb() {
 
    core.startGroup("Installing AppBuilder");
 
-   await exec.exec(`npm i https://github.com/digi-serve/ab-cli -g`);
+   await exec.exec(`npm i https://github.com/digi-serve/ab-cli#guy/Reverse -g`);
 
    await exec.exec(`appbuilder install ${folder}`, installOpts);
    core.endGroup();
