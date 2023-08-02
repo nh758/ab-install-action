@@ -15,7 +15,7 @@ async function stackDeploy(folder, stack, images = []) {
       stack,
    ];
    await exec.exec(
-      "set -o allexport && source .env && set +o allexport && docker stack deploy",
+      "source .env && docker stack deploy",
       opts,
       { cwd: `./${folder}` }
    );
