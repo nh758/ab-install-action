@@ -10,7 +10,7 @@ async function installAb() {
       `--port=${core.getInput("port") || 80}`,
       "--dbExpose=false",
       "--dbPassword=root",
-      "--tag=develop",
+      "--tag=latest",
       "--authType=login",
       "--relayEnabled=false",
       "--pwaURL=http://pwa.site.com",
