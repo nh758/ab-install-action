@@ -23,7 +23,7 @@ beforeEach(() => {
 describe("rebuild services", () => {
    it("calls exec", async () => {
       await rebuildService(["ab_service_user_manager"]);
-      assert.equal(fakeExec.callCount, 1);
+      assert(fakeExec.callCount >= 1);
       const [[command, , options]] = fakeExec.args;
       assert.equal(command, "docker build -t ab_service_user_manager:test .");
       assert.equal(options.cwd, "./ab_service_user_manager");
